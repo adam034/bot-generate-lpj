@@ -1,10 +1,17 @@
-export type ResponseBot = {
+export type Bot = {
   message: string;
   status: number;
-  data: any | null;
+  data:
+    | (Gsheet & {
+        items: Items[];
+        temps: TempData[];
+        total_pagu_2: number;
+        ttd_pengirim: string;
+      })
+    | null;
 };
 
-export type ResponseGsheet = {
+export type Gsheet = {
   nama_pptk: string;
   nip_pptk: string;
   nama_bidang: string;
@@ -53,6 +60,7 @@ export type Items = {
   dpp: string;
   ppn: string;
   ket: string;
+  pagu_2: string;
 };
 
 export type TempData = {

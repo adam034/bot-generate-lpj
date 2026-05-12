@@ -1,6 +1,7 @@
 import { Telegraf, Context, Scenes, session } from "telegraf";
-import { ResponseBot, ResponseGsheet, Items, TempData } from "./schema.js";
+
 import { getGoogleSheet } from "./integrations/google-sheet/client.js";
+import { Bot, Gsheet, Items, TempData } from "./schemas/response.js";
 
 import {
   formatTerbilang,
@@ -10,7 +11,7 @@ import {
 } from "./utils.js";
 import * as fs from "fs";
 
-async function LoadDocument(sheetName: string): Promise<ResponseBot> {
+async function LoadDocument(sheetName: string): Promise<Bot> {
   const items: Items[] = [];
   const temps: TempData[] = [];
 
@@ -25,7 +26,7 @@ async function LoadDocument(sheetName: string): Promise<ResponseBot> {
   }
 
   const rows = (await sheet.getRows())
-    .map((r) => r.toObject() as ResponseGsheet)
+    .map((r) => r.toObject() as Gsheet)
     .filter((data) => data.kode_berkas === "spj");
 
   rows.forEach((r, index) => {
@@ -40,6 +41,8 @@ async function LoadDocument(sheetName: string): Promise<ResponseBot> {
       dpp: formatRupiah(r.dpp),
       ppn: formatRupiah(r.ppn),
       ket: "",
+      pagu_2: formatRupiah((+r.quantity * +r.pagu).toString()),
+      pagu_2_non_str: +r.quantity * +r.pagu,
     });
     temps.push({
       harga: +r.harga,
@@ -52,6 +55,9 @@ async function LoadDocument(sheetName: string): Promise<ResponseBot> {
   }, 0);
   let tax = Math.round((total * 11) / 100);
   let totalIncludeTax = total + Math.round(tax);
+  let totalPagu = items.reduce((acc, r) => {
+    return acc + r.pagu_2_non_str;
+  }, 0);
 
   const results = {
     ...rows[0],
@@ -89,6 +95,8 @@ async function LoadDocument(sheetName: string): Promise<ResponseBot> {
     pajak: formatRupiah(tax.toString()),
     total_jumlah: formatRupiah(total.toString()),
     terbilang_total_jumlah: `${formatTerbilang(total)} Rupiah`,
+    total_pagu_2: formatRupiah(totalPagu.toString()),
+    ttd_pengirim: "{ttd_pengirim}",
     items,
     temps,
   };
