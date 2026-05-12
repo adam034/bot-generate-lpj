@@ -5,7 +5,7 @@ export type Bot = {
     | (Gsheet & {
         items: Items[];
         temps: TempData[];
-        total_pagu_2: number;
+        total_pagu_2: string;
         ttd_pengirim: string;
       })
     | null;
@@ -61,6 +61,7 @@ export type Items = {
   ppn: string;
   ket: string;
   pagu_2: string;
+  pagu_2_non_str: number;
 };
 
 export type TempData = {
